@@ -14,6 +14,8 @@ interface Car {
   brand: string;
   model: string;
   status: 'dostępny' | 'zajęty';
+  startDate?: Date;
+  endDate?: Date;
 }
 
 const initialUsers: User[] = [
@@ -22,19 +24,36 @@ const initialUsers: User[] = [
 ];
 
 const initialCars: Car[] = [
-  { id: 1, brand: 'Toyota', model: 'Corolla', status: 'dostępny' },
-  { id: 2, brand: 'Honda', model: 'Civic', status: 'zajęty' },
+  {
+    id: 1,
+    brand: 'Toyota',
+    model: 'Corolla',
+    status: 'dostępny',
+  },
+  {
+    id: 2,
+    brand: 'Honda',
+    model: 'Civic',
+    status: 'zajęty',
+    startDate: new Date('2025-04-05'),
+    endDate: new Date('2025-04-18'),
+  },
 ];
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [cars, setCars] = useState<Car[]>(initialCars);
-  const [usersExpanded, setUsersExpanded] = useState<boolean>(true);
-  const [carsExpanded, setCarsExpanded] = useState<boolean>(true);
-  const [addCarExpanded, setAddCarExpanded] = useState<boolean>(false);
-
+  const [usersExpanded, setUsersExpanded] = useState(true);
+  const [carsExpanded, setCarsExpanded] = useState(true);
+  const [addCarExpanded, setAddCarExpanded] = useState(false);
   const [newCarBrand, setNewCarBrand] = useState('');
   const [newCarModel, setNewCarModel] = useState('');
+  const [newCarDescrion, setNewCarDescription] = useState('');
+  const [newCarEngige, setNewCarEngine] = useState('');
+  const [newCarMaxSpeed, setNewCarMaxSpeed] = useState(''); 
+  const [newCarAcceleration, setNewCarAcceleration] = useState(''); 
+  const [newCarColor, setNewCarColor] = useState(''); 
+  const [newCarPrice, setNewCarPrice] = useState(''); 
 
   const toggleActiveStatus = (id: number) => {
     setUsers(prev =>
@@ -72,14 +91,20 @@ const AdminPanel: React.FC = () => {
     setNewCarModel('');
   };
 
+  const formatDate = (date?: Date) => {
+    if (!date) return '';
+    return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}.${date.getFullYear()}`;
+  };
+
   return (
     <FlatList
-      data={[...users, ...cars]} // Skonsolidowane dane użytkowników i aut
+      data={[]}
       ListHeaderComponent={
         <>
           <Text style={styles.header}>Panel Admina</Text>
 
-          {/* Sekcja: Użytkownicy */}
           <TouchableOpacity onPress={() => setUsersExpanded(prev => !prev)}>
             <Text style={styles.sectionTitle}>
               {usersExpanded ? '▼' : '▶'} Użytkownicy
@@ -95,19 +120,16 @@ const AdminPanel: React.FC = () => {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.userName}>{item.name}</Text>
                     <Text style={styles.userEmail}>{item.email}</Text>
-
-                    {/* Status użytkownika zmienia kolor w zależności od aktywności */}
                     <Text
                       style={[
                         styles.userStatus,
                         {
-                          color: item.active ? 'rgb(18, 129, 23)' : 'rgb(255, 0, 0)', // Zielony dla aktywnego, czerwony dla nieaktywnego
+                          color: item.active ? 'rgb(18, 129, 23)' : 'rgb(255, 0, 0)',
                         },
                       ]}
                     >
                       Status: {item.active ? 'Aktywny' : 'Nieaktywny'}
                     </Text>
-
                     <Text style={styles.userRole}>Rola: {item.role}</Text>
                   </View>
 
@@ -133,7 +155,6 @@ const AdminPanel: React.FC = () => {
             />
           )}
 
-          {/* Sekcja: Auta */}
           <TouchableOpacity onPress={() => setCarsExpanded(prev => !prev)}>
             <Text style={styles.sectionTitle}>
               {carsExpanded ? '▼' : '▶'} Auta
@@ -152,13 +173,17 @@ const AdminPanel: React.FC = () => {
                   <Text style={styles.carStatus}>
                     Status: {item.status === 'dostępny' ? '✅ Dostępny' : '❌ Zajęty'}
                   </Text>
+                  {item.status === 'zajęty' && (
+                    <Text style={styles.dateText}>
+                      Od: {formatDate(item.startDate)} — Do: {formatDate(item.endDate)}
+                    </Text>
+                  )}
                 </View>
               )}
               ListEmptyComponent={<Text style={styles.emptyText}>Brak aut</Text>}
             />
           )}
 
-          {/* Sekcja: Dodawanie nowych aut */}
           <TouchableOpacity onPress={() => setAddCarExpanded(prev => !prev)}>
             <Text style={styles.sectionTitle}>
               {addCarExpanded ? '▼' : '▶'} Dodaj nowe auto
@@ -179,6 +204,42 @@ const AdminPanel: React.FC = () => {
                 onChangeText={setNewCarModel}
                 style={styles.input}
               />
+              <TextInput
+                placeholder="Opis"
+                value={newCarDescrion}
+                onChangeText={setNewCarDescription}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Silnik"
+                value={newCarEngige}
+                onChangeText={setNewCarEngine}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Maksymalna prędkość"
+                value={newCarMaxSpeed}
+                onChangeText={setNewCarMaxSpeed}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Przyspieszenie"
+                value={newCarAcceleration}
+                onChangeText={setNewCarAcceleration}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Kolor"
+                value={newCarColor}
+                onChangeText={setNewCarColor}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Cena"
+                value={newCarPrice}
+                onChangeText={setNewCarPrice}
+                style={styles.input}
+              />
               <TouchableOpacity onPress={addCar} style={styles.addButton}>
                 <Text style={styles.addButtonText}>Dodaj auto</Text>
               </TouchableOpacity>
@@ -186,33 +247,32 @@ const AdminPanel: React.FC = () => {
           )}
         </>
       }
-      keyExtractor={(item, index) => index.toString()}
-      contentContainerStyle={styles.contentContainer} // Dla scrollowania
+      contentContainerStyle={styles.contentContainer}
     />
   );
 };
 
 const styles = StyleSheet.create({
   contentContainer: {
-    flexGrow: 1, // Dla scrollowania
-    paddingBottom: 20, // Dodanie marginesu dolnego
-    backgroundColor: 'rgb(255, 255, 255)', // Kolor tła na biały
+    flexGrow: 1,
+    paddingBottom: 20,
+    backgroundColor: 'rgb(255, 255, 255)',
   },
   header: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 40, // Obniżenie headera
+    marginBottom: 40,
     textAlign: 'center',
-    color: 'rgb(0, 0, 0)', // Kolor granatowy
+    color: 'rgb(0, 0, 0)',
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: '600',
     marginBottom: 10,
-    color: 'rgb(0, 0, 0)', // Kolor niebieski
+    color: 'rgb(0, 0, 0)',
   },
   userCard: {
-    backgroundColor: 'rgb(240, 244, 248)', // Jasny szary kolor dla karty użytkownika
+    backgroundColor: 'rgb(240, 244, 248)',
     padding: 18,
     borderRadius: 12,
     marginBottom: 18,
@@ -227,17 +287,17 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: '500',
-    color: 'rgb(51, 51, 51)', // Kolor czarny
+    color: 'rgb(51, 51, 51)',
   },
   userEmail: {
-    color: 'rgb(85, 85, 85)', // Subtelny szary
+    color: 'rgb(85, 85, 85)',
     marginBottom: 6,
   },
   userStatus: {
     fontSize: 14,
   },
   userRole: {
-    color: 'rgb(255, 112, 67)', // Czerwony dla roli
+    color: 'rgb(255, 112, 67)',
     fontSize: 14,
   },
   actions: {
@@ -246,13 +306,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: 'rgb(59, 110, 52)', // Niebieski
+    color: 'rgb(59, 110, 52)',
   },
   roleButton: {
     marginTop: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: 'rgb(102, 187, 106)', // Zielony dla przycisku
+    backgroundColor: 'rgb(102, 187, 106)',
     borderRadius: 6,
   },
   roleButtonText: {
@@ -261,7 +321,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   carCard: {
-    backgroundColor: 'rgb(240, 244, 248)', // Kolor tła karty auta
+    backgroundColor: 'rgb(240, 244, 248)',
     padding: 18,
     borderRadius: 12,
     marginBottom: 18,
@@ -274,11 +334,16 @@ const styles = StyleSheet.create({
   carText: {
     fontSize: 18,
     fontWeight: '500',
-    color: 'rgb(51, 51, 51)', // Kolor czarny
+    color: 'rgb(51, 51, 51)',
   },
   carStatus: {
-    color: 'rgb(0, 122, 255)', // Niebieski dla statusu auta
+    color: 'rgb(0, 122, 255)',
     fontSize: 14,
+  },
+  dateText: {
+    fontSize: 14,
+    color: 'rgb(80, 80, 80)',
+    marginTop: 4,
   },
   emptyText: {
     textAlign: 'center',
